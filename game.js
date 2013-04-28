@@ -43,6 +43,8 @@ function sequence(l) {
 
 var STEP = 75;
 
+var HEIGHT = 6;
+
 var BPM = 80;
 
 
@@ -62,7 +64,7 @@ level.position.x = 0;
 level.position.y = 0;
 stage.addChild(level);
 // create a renderer instance.
-var renderer = PIXI.autoDetectRenderer(STEP*8, STEP*6);
+var renderer = PIXI.autoDetectRenderer(STEP*8, STEP*HEIGHT);
 
 // add the renderer view element to the DOM
 document.body.appendChild(renderer.view);
@@ -76,34 +78,40 @@ var boxes = sequence(6*2).map(function(v){
     var box = new PIXI.Sprite(PIXI.Texture.fromImage("line.png"));
     box.anchor.x = 0.5;
     box.anchor.y = 0.5;
+    box.alpha = v % 2 ? 1 : .5;
     box.position.x = STEP*4;
-    box.position.y = v * STEP - STEP* (6/2);
+    box.position.y = v * STEP - STEP*HEIGHT;
     box.scale.x = box.scale.y = 1;
     level.addChild(box);
     return box;
 })
 
+var beatmeter = new PIXI.Sprite(PIXI.Texture.fromImage("greenline.png"));
+beatmeter.anchor.x = 0.5;
+beatmeter.anchor.y = 0.5;
+beatmeter.position.x = STEP*4;
+stage.addChild(beatmeter);
+
 var scope = new PIXI.Sprite(PIXI.Texture.fromImage("scope.png"));
 scope.anchor.x = .5;
 scope.anchor.y = .5;
-scope.position.x = STEP*4;
-scope.position.y = STEP*4;
-
 stage.addChild(scope);
-
+scope.position.x = STEP*4;
+scope.position.y = STEP*HEIGHT/2;
+scope.blendMode = PIXI.blendModes.SCREEN;
 
 var bpmText = new PIXI.Text("BPM"+BPM, "22px Arial", "red");
 bpmText.anchor.x = 0;
 bpmText.anchor.y = 1;
-bpmText.position.y = STEP*6;
+bpmText.position.y = STEP*HEIGHT;
 stage.addChild(bpmText);
 
 var scoreText = new PIXI.Text("0", "22px Arial", "red");
 scoreText.anchor.x = 1;
 scoreText.anchor.y = 1;
 scoreText.position.x = STEP*8;
-scoreText.position.y = STEP*6;
-stage.addChild(scoreText);
+scoreText.position.y = STEP*HEIGHT;
+//stage.addChild(scoreText);
 
 var changes = [];
 var lbeat = 0;
@@ -130,7 +138,6 @@ function fits(v, base, span) {
 
 function timeAt(timevalue) {
     var l = timbre.timevalue(timevalue);
-    console.log( Math.round(interv.currentTime / l));
     return Math.round(interv.currentTime / l)*l;
 }
 
@@ -155,7 +162,7 @@ T("audio").load("drumkit.wav", function() {
     // beats
     var beat = {
         "HH1":[1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0],
-        "BD" :[0, 0, 0, 1, 0, 0, 0, 1],
+        "BD" :[1, 0, 0, 0, 1, 0, 0, 0],
         "HH2" : [0,1,0,0],
         "CYM": [0,0,0,0,1]
 //        ,"SD": [0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0]
@@ -193,15 +200,27 @@ T("audio").load("drumkit.wav", function() {
             arp.set("mul", 0.5);
         }
         // PAUSE end
+        //
+        //if (interv.count % 4 === 0)
+        beatmeter.position.y = Math.round((interv.count % HEIGHT)) * STEP;
 
     }).start();
  // LOGICS START
     function everySecond(t) {return fits(t, timeAt("BPM"+BPM+" L4"), 100);};
+    function nearBeat(t,d) {
+        return t < (lbeat + d) || t > (lbeat+ timbre.timevalue("BPM" + BPM + "L16") - d)
+    }
+
+    function nearSecond(t,d) {
+        return t < (lbeat + d) || t > (lbeat+ timbre.timevalue("BPM" + BPM + "L16") - d)
+    }
+
+
 
     var level1 = {
         count: 0,
         check: function(t) {
-            if (everySecond(t)) {
+            if (nearBeat(t, 100) && interv.count % 4 !== 0 && interv.count % 2 === 0) {
                 this.count ++;
                 SD.bang();
             } else {
@@ -247,15 +266,17 @@ T("audio").load("drumkit.wav", function() {
         return {t:c.t, b: c.b, s: res.s + (res.t - c.t)*res.b + (i === 0 ? c.b : 0) };
     }
 
+    function beatsPassed() {
+        if (changes.length > 0) return changes.reduceRight(foldPos, {t: interv.currentTime, b: BPM, s: 0}).s;
+        return interv.currentTime * BPM;
+    }
+
     function animate() {
         requestAnimFrame(animate);
-        var move = 0;
-        if (changes.length > 0) {
-            //console.log(changes);
-            var s = changes.reduceRight(foldPos, {t: interv.currentTime, b: BPM, s: 0}).s;
-            move = s*STEP/30000;
-        } else move = interv.currentTime * (BPM*STEP/30000);
-        level.position.y = move%(STEP*(6/2));
+        var bps = beatsPassed();
+        var move = bps*STEP/30000;
+        level.position.y = move%(STEP*HEIGHT) - STEP/2;
+        console.log(move%(STEP*HEIGHT));
         renderer.render(stage);
     }
 
