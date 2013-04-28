@@ -41,9 +41,9 @@ function sequence(l) {
  */
 
 
-var STEP = 75;
+var STEP = 50;
 
-var HEIGHT = 6;
+var HEIGHT = 8;
 
 var BPM = 80;
 
@@ -74,13 +74,13 @@ var ty = 0;
 
 
 
-var boxes = sequence(6*2).map(function(v){
+var boxes = sequence(16*2).map(function(v){
     var box = new PIXI.Sprite(PIXI.Texture.fromImage("line.png"));
     box.anchor.x = 0.5;
     box.anchor.y = 0.5;
     box.alpha = v % 2 ? 1 : .5;
     box.position.x = STEP*4;
-    box.position.y = v * STEP - STEP*HEIGHT;
+    box.position.y = - v * STEP;
     box.scale.x = box.scale.y = 1;
     level.addChild(box);
     return box;
@@ -275,7 +275,7 @@ T("audio").load("drumkit.wav", function() {
         requestAnimFrame(animate);
         var bps = beatsPassed();
         var move = bps*STEP/30000;
-        level.position.y = move%(STEP*HEIGHT) - STEP/2;
+        level.position.y =( (interv.count % 16 + (interv.currentTime - lbeat)/timbre.timevalue("BPM"+BPM+" L16"))*STEP/2 + HEIGHT * STEP);
         console.log(move%(STEP*HEIGHT));
         renderer.render(stage);
     }
