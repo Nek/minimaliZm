@@ -311,7 +311,7 @@ T("audio").load("drumkit.wav", function() {
         },
         keydown: function(t) {
             if (this.count === 1) fadeMessage();
-            if (nearBeat(t, 100) && interv.count % 4 !== 0 && interv.count % 2 === 0) {
+            if (nearBeat(t, 150) && interv.count % 4 !== 0 && interv.count % 2 === 0) {
                 this.count ++;
                 SD.bang();
             } else {
@@ -346,7 +346,7 @@ T("audio").load("drumkit.wav", function() {
         },
         keydown: function(t) {
             if (this.count === 1) fadeMessage();
-            if (nearBeat(t, 100) && interv.count % 4 === 0) {
+            if (nearBeat(t, 150) && interv.count % 4 === 0) {
                 this.count ++;
                 BD.bang();
             } else {
@@ -395,7 +395,7 @@ T("audio").load("drumkit.wav", function() {
                    //}
         //arp.noteOn(noteNum + 24, 60);
 
-            if(nearBeat(t, 100)) {
+            if(nearBeat(t, 150)) {
                 if (interv.count % 4 !== 0 && interv.count % 2 === 0) {
                     this.count += 1;
                       //lead.freq.linTo(noteNum.midicps() * 2, "100ms");
