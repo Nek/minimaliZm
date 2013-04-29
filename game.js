@@ -67,7 +67,10 @@ stage.addChild(level);
 var renderer = PIXI.autoDetectRenderer(STEP*8, STEP*HEIGHT);
 
 // add the renderer view element to the DOM
-document.body.appendChild(renderer.view);
+//document.body.appendChild(renderer.view);
+
+var s = document.getElementById("scene");
+s.appendChild(renderer.view);
 
 var boxes = sequence(16*2).map(function(v){
     var box = new PIXI.Sprite(PIXI.Texture.fromImage("line.png"));

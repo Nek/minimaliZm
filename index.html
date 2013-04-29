@@ -7,11 +7,23 @@
             body {
                 margin: 0;
                 padding: 0;
-                background-color: #000000;
+                background-color: #111;
+                margin: auto;
+            }
+            .cont {
+                left: 50%;
+                top: 50%;
+                position: absolute;
+            }
+            #scene {
+                position:relative;
+                left: -200px;
+                top: -200px;
             }
         </style>
     </head>
     <body>
+    <div class='cont'><div id="scene"></div></div>
     <script src="tween.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="pixi.js" type="text/javascript" charset="utf-8"></script>
     <script src="subcollider.js" type="text/javascript" charset="utf-8"></script>
